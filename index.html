@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refinance Comparison Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .form-container {
+            width: 400px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .form-section {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e0e0e0;
+        }
+        .form-section h3 {
+            margin-top: 0;
+        }
+        .form-section label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-section input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .results-container {
+            width: 600px;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        .results-container h3 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="form-container">
+        <form id="refinanceForm">
+            <div class="form-section" id="subject-property">
+                <h3>Subject Property</h3>
+                <label for="borrowerName">Borrower Name</label>
+                <input type="text" id="borrowerName" placeholder="Borrower Name">
+                <label for="currentValue">Current Value</label>
+                <input type="number" id="currentValue" placeholder="$XXX,XXX.XX">
+                <label for="currentTaxes">Current Property Taxes (Annual)</label>
+                <input type="number" id="currentTaxes" placeholder="$XXX,XXX.XX">
+                <label for="currentInsurance">Current Homeowner's Insurance Premium (Annual)</label>
+                <input type="number" id="currentInsurance" placeholder="$XXX,XXX.XX">
+            </div>
+
+            <div class="form-section" id="existing-mortgage">
+                <h3>Existing Mortgage</h3>
+                <label for="purchasePrice">Purchase Price</label>
+                <input type="number" id="purchasePrice" placeholder="$XXX,XXX.XX">
+                <label for="downPayment">Down Payment</label>
+                <input type="number" id="downPayment" placeholder="$XXX,XXX.XX">
+                <label for="originalLoan">Original Base Loan Amount</label>
+                <input type="number" id="originalLoan" placeholder="$XXX,XXX.XX">
+                <label for="interestRate">Original Interest Rate</label>
+                <input type="number" step="0.01" id="interestRate" placeholder="XX.XX%">
+            </div>
+
+            <div class="form-section" id="proposed-refinance">
+                <h3>Proposed Refinance</h3>
+                <label for="newLoanAmount">New Base Loan Amount</label>
+                <input type="number" id="newLoanAmount" placeholder="$XXX,XXX.XX">
+                <label for="newInterestRate">New Interest Rate</label>
+                <input type="number" step="0.01" id="newInterestRate" placeholder="XX.XX%">
+                <label for="closingCosts">Closing Costs</label>
+                <input type="number" id="closingCosts" placeholder="$XXX,XXX.XX">
+            </div>
+
+            <button type="button" onclick="calculateResults()">Calculate</button>
+        </form>
+    </div>
+
+    <div class="results-container" id="results">
+        <h3>Results</h3>
+        <p id="existingPayment"></p>
+        <p id="proposedPayment"></p>
+        <p id="monthlySavings"></p>
+        <p id="breakEven"></p>
+    </div>
+</div>
+
+<script>
+    function calculateResults() {
+        // Get form values
+        const originalLoan = parseFloat(document.getElementById("originalLoan").value);
+        const interestRate = parseFloat(document.getElementById("interestRate").value) / 100;
+        const newLoanAmount = parseFloat(document.getElementById("newLoanAmount").value);
+        const newInterestRate = parseFloat(document.getElementById("newInterestRate").value) / 100;
+        const closingCosts = parseFloat(document.getElementById("closingCosts").value);
+
+        // Calculate existing loan monthly payment (simple example)
+        const originalMonthlyPayment = (originalLoan * interestRate) / 12;
+
+        // Calculate proposed loan monthly payment
+        const proposedMonthlyPayment = (newLoanAmount * newInterestRate) / 12;
+
+        // Monthly savings
+        const savings = originalMonthlyPayment - proposedMonthlyPayment;
+
+        // Break-even point
+        const breakEven = closingCosts / savings;
+
+        // Display results
+        document.getElementById("existingPayment").innerHTML = "Existing Monthly Payment: $" + originalMonthlyPayment.toFixed(2);
+        document.getElementById("proposedPayment").innerHTML = "Proposed Monthly Payment: $" + proposedMonthlyPayment.toFixed(2);
+        document.getElementById("monthlySavings").innerHTML = "Monthly Savings: $" + savings.toFixed(2);
+        document.getElementById("breakEven").innerHTML = "Break-Even Point: " + breakEven.toFixed(2) + " months";
+    }
+</script>
+
+</body>
+</html>
