@@ -153,6 +153,64 @@
                 <label for="newInterestRate">New Interest Rate:</label>
                 <input type="text" id="newInterestRate" oninput="formatPercentage(this)">
             </div>
+            <div class="form-group">
+                <label for="discountPointsPercent">Discount Points %:</label>
+                <input type="text" id="discountPointsPercent" oninput="calculateDiscountPointsPercent()">
+            </div>
+            <div class="form-group">
+                <label for="discountPointsAmount">Discount Points $:</label>
+                <input type="text" id="discountPointsAmount" oninput="calculateDiscountPointsAmount()">
+            </div>
+            <h4>Escrow Costs</h4>
+            <div class="form-group">
+                <label for="settlementFee">Settlement Fee:</label>
+                <input type="text" id="settlementFee" oninput="formatCurrency(this)">
+            </div>
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" oninput="formatCurrency(this)">
+            </div>
+            <div class="form-group">
+                <label for="recording">Recording:</label>
+                <input type="text" id="recording" oninput="formatCurrency(this)">
+            </div>
+            <h4>Prepaids</h4>
+            <div class="form-group">
+                <label for="prepaidTaxes">Prepaid Property Taxes:</label>
+                <input type="text" id="prepaidTaxes" oninput="formatCurrency(this)">
+            </div>
+            <div class="form-group">
+                <label for="prepaidInsurance">Prepaid Homeowner's Insurance:</label>
+                <input type="text" id="prepaidInsurance" oninput="formatCurrency(this)">
+            </div>
+            <h4>Loan Costs</h4>
+            <div class="form-group">
+                <label for="processingFee">Processing & Underwriting:</label>
+                <input type="text" id="processingFee" value="$1,500" oninput="formatCurrency(this)">
+            </div>
+            <div class="form-group">
+                <label for="appraisal">Appraisal:</label>
+                <input type="text" id="appraisal" value="$900" oninput="formatCurrency(this)">
+            </div>
+            <div class="form-group">
+                <label for="misc">Misc:</label>
+                <input type="text" id="misc" value="$250" oninput="formatCurrency(this)">
+            </div>
+            <div class="form-group">
+                <label for="fhaLoanProposed">FHA Loan:</label>
+                <select id="fhaLoanProposed" onchange="checkFhaLoanProposed()">
+                    <option value="no">NO</option>
+                    <option value="yes">YES</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="mortgageInsuranceFactorProposed">Mortgage Insurance Factor:</label>
+                <input type="text" id="mortgageInsuranceFactorProposed" readonly>
+            </div>
+            <div class="form-group">
+                <label for="totalProposedLoanAmount">Total Proposed Loan Amount:</label>
+                <input type="text" id="totalProposedLoanAmount" readonly>
+            </div>
         </div>
     </div>
 
@@ -182,51 +240,32 @@
             input.value = value.toFixed(2) + "%";
         }
 
-        function calculateDownPaymentPercent() {
-            let purchasePrice = parseFloat(document.getElementById('purchasePrice').value.replace(/[^0-9.-]+/g,""));
-            let downPaymentAmount = parseFloat(document.getElementById('downPaymentAmount').value.replace(/[^0-9.-]+/g,""));
-            if (purchasePrice && downPaymentAmount) {
-                let percent = (downPaymentAmount / purchasePrice) * 100;
-                document.getElementById('downPaymentPercent').value = percent.toFixed(2) + "%";
-                calculateOriginalLoanAmount();
+        function calculateDiscountPointsPercent() {
+            let loanAmount = parseFloat(document.getElementById('newLoanAmount').value.replace(/[^0-9.-]+/g,""));
+            let discountPointsAmount = parseFloat(document.getElementById('discountPointsAmount').value.replace(/[^0-9.-]+/g,""));
+            if (loanAmount && discountPointsAmount) {
+                let percent = (discountPointsAmount / loanAmount) * 100;
+                document.getElementById('discountPointsPercent').value = percent.toFixed(2) + "%";
             }
         }
 
-        function calculateDownPaymentAmount() {
-            let purchasePrice = parseFloat(document.getElementById('purchasePrice').value.replace(/[^0-9.-]+/g,""));
-            let downPaymentPercent = parseFloat(document.getElementById('downPaymentPercent').value.replace(/[^0-9.-]+/g,""));
-            if (purchasePrice && downPaymentPercent) {
-                let amount = (downPaymentPercent / 100) * purchasePrice;
-                document.getElementById('downPaymentAmount').value = "$" + amount.toFixed(2);
-                calculateOriginalLoanAmount();
+        function calculateDiscountPointsAmount() {
+            let loanAmount = parseFloat(document.getElementById('newLoanAmount').value.replace(/[^0-9.-]+/g,""));
+            let discountPointsPercent = parseFloat(document.getElementById('discountPointsPercent').value.replace(/[^0-9.-]+/g,""));
+            if (loanAmount && discountPointsPercent) {
+                let amount = (discountPointsPercent / 100) * loanAmount;
+                document.getElementById('discountPointsAmount').value = "$" + amount.toFixed(2);
             }
         }
 
-        function calculateOriginalLoanAmount() {
-            let purchasePrice = parseFloat(document.getElementById('purchasePrice').value.replace(/[^0-9.-]+/g,""));
-            let downPaymentAmount = parseFloat(document.getElementById('downPaymentAmount').value.replace(/[^0-9.-]+/g,""));
-            if (purchasePrice && downPaymentAmount) {
-                let loanAmount = purchasePrice - downPaymentAmount;
-                document.getElementById('originalLoanAmount').value = "$" + loanAmount.toFixed(2);
-            }
-        }
-
-        function checkFhaLoan() {
-            let fhaLoan = document.getElementById('fhaLoan').value;
-            let purchaseDate = new Date(document.getElementById('purchaseDate').value);
-            let march2023 = new Date("2023-03-01");
-
+        function checkFhaLoanProposed() {
+            let fhaLoan = document.getElementById('fhaLoanProposed').value;
             if (fhaLoan === "yes") {
-                if (purchaseDate < march2023) {
-                    document.getElementById('mortgageInsuranceFactor').value = "0.85%";
-                } else {
-                    document.getElementById('mortgageInsuranceFactor').value = "0.55%";
-                }
+                document.getElementById('mortgageInsuranceFactorProposed').value = "0.55%";
             } else {
-                document.getElementById('mortgageInsuranceFactor').value = "";
+                document.getElementById('mortgageInsuranceFactorProposed').value = "";
             }
         }
-
     </script>
 
 </body>
