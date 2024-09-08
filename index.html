@@ -90,70 +90,68 @@
             </div>
             <div class="form-group">
                 <label for="currentValue">Current Value:</label>
-                <input type="number" id="currentValue" placeholder="$0.00">
+                <input type="text" id="currentValue" oninput="formatCurrency(this)">
             </div>
             <div class="form-group">
                 <label for="propertyTaxes">Current Property Taxes (Annual):</label>
-                <input type="number" id="propertyTaxes" placeholder="$0.00">
+                <input type="text" id="propertyTaxes" oninput="formatCurrency(this)">
             </div>
             <div class="form-group">
                 <label for="homeownersInsurance">Current Homeowner's Insurance Premium (Annual):</label>
-                <input type="number" id="homeownersInsurance" placeholder="$0.00">
+                <input type="text" id="homeownersInsurance" oninput="formatCurrency(this)">
             </div>
         </div>
 
         <!-- Existing Mortgage Section -->
         <div class="form-section existing-mortgage">
             <h3>Existing Mortgage</h3>
-            <!-- Form fields for existing mortgage details -->
             <div class="form-group">
                 <label for="purchaseDate">Date of Purchase:</label>
                 <input type="date" id="purchaseDate">
             </div>
             <div class="form-group">
                 <label for="purchasePrice">Purchase Price:</label>
-                <input type="number" id="purchasePrice" placeholder="$0.00">
+                <input type="text" id="purchasePrice" oninput="formatCurrency(this)">
             </div>
             <div class="form-group">
                 <label for="downPaymentPercent">Down Payment %:</label>
-                <input type="number" id="downPaymentPercent" placeholder="0%">
+                <input type="text" id="downPaymentPercent" oninput="calculateDownPaymentPercent()">
             </div>
             <div class="form-group">
                 <label for="downPaymentAmount">Down Payment $:</label>
-                <input type="number" id="downPaymentAmount" placeholder="$0.00">
+                <input type="text" id="downPaymentAmount" oninput="calculateDownPaymentAmount()">
             </div>
             <div class="form-group">
                 <label for="originalLoanAmount">Original Base Loan Amount:</label>
-                <input type="number" id="originalLoanAmount" placeholder="$0.00">
+                <input type="text" id="originalLoanAmount" readonly>
             </div>
             <div class="form-group">
                 <label for="interestRate">Original Interest Rate:</label>
-                <input type="number" id="interestRate" placeholder="0%">
+                <input type="text" id="interestRate" oninput="formatPercentage(this)">
             </div>
             <div class="form-group">
                 <label for="fhaLoan">FHA Loan:</label>
-                <select id="fhaLoan">
+                <select id="fhaLoan" onchange="checkFhaLoan()">
                     <option value="no">NO</option>
                     <option value="yes">YES</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="mortgageInsuranceFactor">Mortgage Insurance Factor:</label>
-                <input type="number" id="mortgageInsuranceFactor" placeholder="0.00%">
+                <input type="text" id="mortgageInsuranceFactor" readonly>
             </div>
         </div>
 
         <!-- Proposed Refinance Section -->
         <div class="form-section proposed-refinance">
             <h3>Proposed Refinance</h3>
-            <!-- Form fields for proposed refinance details -->
             <div class="form-group">
                 <label for="newLoanAmount">New Base Loan Amount:</label>
-                <input type="number" id="newLoanAmount" placeholder="$0.00">
+                <input type="text" id="newLoanAmount" readonly>
             </div>
             <div class="form-group">
                 <label for="newInterestRate">New Interest Rate:</label>
-                <input type="number" id="newInterestRate" placeholder="0%">
+                <input type="text" id="newInterestRate" oninput="formatPercentage(this)">
             </div>
         </div>
     </div>
@@ -172,7 +170,63 @@
     </div>
 
     <script>
-        // Future functionality for calculations and formatting
+        function formatCurrency(input) {
+            let value = parseFloat(input.value.replace(/[^0-9.-]+/g,""));
+            if (isNaN(value)) value = 0;
+            input.value = "$" + value.toFixed(2);
+        }
+
+        function formatPercentage(input) {
+            let value = parseFloat(input.value.replace(/[^0-9.-]+/g,""));
+            if (isNaN(value)) value = 0;
+            input.value = value.toFixed(2) + "%";
+        }
+
+        function calculateDownPaymentPercent() {
+            let purchasePrice = parseFloat(document.getElementById('purchasePrice').value.replace(/[^0-9.-]+/g,""));
+            let downPaymentAmount = parseFloat(document.getElementById('downPaymentAmount').value.replace(/[^0-9.-]+/g,""));
+            if (purchasePrice && downPaymentAmount) {
+                let percent = (downPaymentAmount / purchasePrice) * 100;
+                document.getElementById('downPaymentPercent').value = percent.toFixed(2) + "%";
+                calculateOriginalLoanAmount();
+            }
+        }
+
+        function calculateDownPaymentAmount() {
+            let purchasePrice = parseFloat(document.getElementById('purchasePrice').value.replace(/[^0-9.-]+/g,""));
+            let downPaymentPercent = parseFloat(document.getElementById('downPaymentPercent').value.replace(/[^0-9.-]+/g,""));
+            if (purchasePrice && downPaymentPercent) {
+                let amount = (downPaymentPercent / 100) * purchasePrice;
+                document.getElementById('downPaymentAmount').value = "$" + amount.toFixed(2);
+                calculateOriginalLoanAmount();
+            }
+        }
+
+        function calculateOriginalLoanAmount() {
+            let purchasePrice = parseFloat(document.getElementById('purchasePrice').value.replace(/[^0-9.-]+/g,""));
+            let downPaymentAmount = parseFloat(document.getElementById('downPaymentAmount').value.replace(/[^0-9.-]+/g,""));
+            if (purchasePrice && downPaymentAmount) {
+                let loanAmount = purchasePrice - downPaymentAmount;
+                document.getElementById('originalLoanAmount').value = "$" + loanAmount.toFixed(2);
+            }
+        }
+
+        function checkFhaLoan() {
+            let fhaLoan = document.getElementById('fhaLoan').value;
+            let purchaseDate = new Date(document.getElementById('purchaseDate').value);
+            let march2023 = new Date("2023-03-01");
+
+            if (fhaLoan === "yes") {
+                if (purchaseDate < march2023) {
+                    document.getElementById('mortgageInsuranceFactor').value = "0.85%";
+                } else {
+                    document.getElementById('mortgageInsuranceFactor').value = "0.55%";
+                }
+            } else {
+                document.getElementById('mortgageInsuranceFactor').value = "";
+            }
+        }
+
     </script>
 
 </body>
