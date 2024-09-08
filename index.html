@@ -2,501 +2,178 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Refinance Comparison Tool</title>
     <style>
-        /* General Styles */
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
             display: flex;
+            justify-content: flex-start;
         }
-        /* Form Styles */
+
         .form-container {
             width: 400px;
-            max-height: 900px;
-            overflow-y: auto;
             padding: 20px;
-            background-color: #f0f0f0;
         }
+
         .form-section {
             margin-bottom: 20px;
-            padding: 10px;
+            padding: 15px;
+            border-radius: 8px;
         }
+
         .subject-property {
-            background-color: #e8f5e9;
+            background-color: #f0f8ff;
         }
+
         .existing-mortgage {
-            background-color: #e3f2fd;
+            background-color: #e6ffe6;
         }
+
         .proposed-refinance {
-            background-color: #fff3e0;
+            background-color: #ffe6e6;
         }
-        .form-section h3 {
-            margin-top: 0;
+
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
         }
-        .form-section label {
-            display: block;
-            margin: 10px 0 5px;
+
+        label {
+            flex: 1;
+            margin-right: 10px;
         }
-        .form-section input,
-        .form-section select {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
+
+        input, select {
+            flex: 1;
+            padding: 5px;
+            font-size: 1em;
+            width: 100px;
+            text-align: right;
         }
-        /* Results Styles */
-        .results-container {
-            flex-grow: 1;
+
+        .comparison-results {
+            margin-left: 20px;
             padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            width: 500px;
         }
-        .results-container h3 {
-            margin-top: 0;
+
+        h3 {
+            margin-bottom: 10px;
         }
-        .results-section {
-            margin-bottom: 20px;
-        }
-        /* Graph Styles */
-        #costChart {
-            max-width: 100%;
-            height: 400px;
+
+        .graph-container {
+            margin-top: 20px;
+            width: 100%;
+            height: 300px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Form Container -->
     <div class="form-container">
-        <form id="refinanceForm">
-            <!-- Subject Property -->
-            <div class="form-section subject-property">
-                <h3>Subject Property</h3>
-                <label for="borrowerName">Borrower Name</label>
-                <input type="text" id="borrowerName" maxlength="100">
-
-                <label for="propertyID">Property ID</label>
-                <input type="text" id="propertyID" maxlength="20">
-
-                <label for="currentValue">Current Value ($)</label>
-                <input type="number" id="currentValue" step="0.01" placeholder="$xxx,xxx.xx">
-
-                <label for="currentTaxes">Current Property Taxes (Annual $)</label>
-                <input type="number" id="currentTaxes" step="0.01" placeholder="$xxx,xxx.xx">
-
-                <label for="currentInsurance">Current Homeowner's Insurance Premium (Annual $)</label>
-                <input type="number" id="currentInsurance" step="0.01" placeholder="$xxx,xxx.xx">
+        <h1>Refinance Comparison Tool</h1>
+        
+        <!-- Subject Property Section -->
+        <div class="form-section subject-property">
+            <h3>Subject Property</h3>
+            <div class="form-group">
+                <label for="borrowerName">Borrower Name:</label>
+                <input type="text" id="borrowerName">
             </div>
+            <div class="form-group">
+                <label for="propertyID">Property ID:</label>
+                <input type="text" id="propertyID">
+            </div>
+            <div class="form-group">
+                <label for="currentValue">Current Value:</label>
+                <input type="number" id="currentValue" placeholder="$0.00">
+            </div>
+            <div class="form-group">
+                <label for="propertyTaxes">Current Property Taxes (Annual):</label>
+                <input type="number" id="propertyTaxes" placeholder="$0.00">
+            </div>
+            <div class="form-group">
+                <label for="homeownersInsurance">Current Homeowner's Insurance Premium (Annual):</label>
+                <input type="number" id="homeownersInsurance" placeholder="$0.00">
+            </div>
+        </div>
 
-            <!-- Existing Mortgage -->
-            <div class="form-section existing-mortgage">
-                <h3>Existing Mortgage</h3>
-                <label for="purchaseDate">Date of Purchase</label>
+        <!-- Existing Mortgage Section -->
+        <div class="form-section existing-mortgage">
+            <h3>Existing Mortgage</h3>
+            <!-- Form fields for existing mortgage details -->
+            <div class="form-group">
+                <label for="purchaseDate">Date of Purchase:</label>
                 <input type="date" id="purchaseDate">
-
-                <label for="purchasePrice">Purchase Price ($)</label>
-                <input type="number" id="purchasePrice" step="0.01" placeholder="$xxx,xxx.xx">
-
-                <label for="downPaymentPercent">Down Payment (%)</label>
-                <input type="number" id="downPaymentPercent" step="0.01" placeholder="%" oninput="updateDownPayment('percent')">
-
-                <label for="downPaymentAmount">Down Payment ($)</label>
-                <input type="number" id="downPaymentAmount" step="0.01" placeholder="$xxx,xxx.xx" oninput="updateDownPayment('amount')">
-
-                <label for="originalBaseLoan">Original Base Loan Amount ($)</label>
-                <input type="number" id="originalBaseLoan" step="0.01" readonly>
-
-                <label for="originalInterestRate">Original Interest Rate (%)</label>
-                <input type="number" id="originalInterestRate" step="0.01" placeholder="%">
-
-                <label for="fhaLoanExisting">FHA Loan</label>
-                <select id="fhaLoanExisting" onchange="updateMortgageInsuranceFactor('existing')">
-                    <option value="No">No</option>
-                    <option value="Yes">Yes</option>
-                </select>
-
-                <label for="mortgageInsuranceFactorExisting">Mortgage Insurance Factor (%)</label>
-                <input type="number" id="mortgageInsuranceFactorExisting" step="0.01" placeholder="%" readonly>
-
-                <label for="originalTotalLoan">Original Total Loan Amount ($)</label>
-                <input type="number" id="originalTotalLoan" step="0.01" readonly>
-
-                <label for="estimatedRemainingBalance">Estimated Remaining Balance ($)</label>
-                <input type="number" id="estimatedRemainingBalance" step="0.01" readonly>
             </div>
-
-            <!-- Proposed Refinance -->
-            <div class="form-section proposed-refinance">
-                <h3>Proposed Refinance</h3>
-                <label for="newBaseLoanAmount">New Base Loan Amount ($)</label>
-                <input type="number" id="newBaseLoanAmount" step="0.01" placeholder="$xxx,xxx.xx">
-
-                <label for="newInterestRate">New Interest Rate (%)</label>
-                <input type="number" id="newInterestRate" step="0.01" placeholder="%">
-
-                <label for="mortgageInsuranceFactorProposed">Mortgage Insurance Factor (%)</label>
-                <input type="number" id="mortgageInsuranceFactorProposed" step="0.01" placeholder="%">
-
-                <label for="discountPointsPercent">Discount Points (%)</label>
-                <input type="number" id="discountPointsPercent" step="0.01" placeholder="%" oninput="updateDiscountPoints('percent')">
-
-                <label for="discountPointsAmount">Discount Points ($)</label>
-                <input type="number" id="discountPointsAmount" step="0.01" placeholder="$xxx,xxx.xx" oninput="updateDiscountPoints('amount')">
-
-                <!-- Closing Costs -->
-                <h4>Closing Costs</h4>
-                <label for="escrow">Escrow ($)</label>
-                <input type="number" id="escrow" step="0.01" placeholder="$xxx,xxx.xx">
-
-                <label for="title">Title ($)</label>
-                <input type="number" id="title" step="0.01" placeholder="$xxx,xxx.xx">
-
-                <label for="recording">Recording ($)</label>
-                <input type="number" id="recording" step="0.01" placeholder="$xxx,xxx.xx">
-
-                <label for="totalClosingCosts">Total Closing Costs ($)</label>
-                <input type="number" id="totalClosingCosts" step="0.01" readonly>
-
-                <!-- Prepaids -->
-                <h4>Prepaids</h4>
-                <label for="prepaidTaxes">Property Taxes ($)</label>
-                <input type="number" id="prepaidTaxes" step="0.01" placeholder="$xxx,xxx.xx">
-
-                <label for="prepaidInsurance">Homeowner's Insurance ($)</label>
-                <input type="number" id="prepaidInsurance" step="0.01" placeholder="$xxx,xxx.xx">
-
-                <label for="totalPrepaids">Total Prepaids ($)</label>
-                <input type="number" id="totalPrepaids" step="0.01" readonly>
-
-                <!-- Loan Costs -->
-                <h4>Loan Costs</h4>
-                <label for="processingUnderwriting">Processing & Underwriting ($)</label>
-                <input type="number" id="processingUnderwriting" step="0.01" value="1500">
-
-                <label for="appraisal">Appraisal ($)</label>
-                <input type="number" id="appraisal" step="0.01" value="900">
-
-                <label for="misc">Misc ($)</label>
-                <input type="number" id="misc" step="0.01" value="250">
-
-                <label for="totalLoanCosts">Total Loan Costs ($)</label>
-                <input type="number" id="totalLoanCosts" step="0.01" readonly>
-
-                <label for="fhaLoanProposed">FHA Loan</label>
-                <select id="fhaLoanProposed" onchange="updateMortgageInsuranceFactor('proposed')">
-                    <option value="No">No</option>
-                    <option value="Yes">Yes</option>
-                </select>
-
-                <label for="totalProposedLoanAmount">Total Proposed Loan Amount ($)</label>
-                <input type="number" id="totalProposedLoanAmount" step="0.01" readonly>
+            <div class="form-group">
+                <label for="purchasePrice">Purchase Price:</label>
+                <input type="number" id="purchasePrice" placeholder="$0.00">
             </div>
+            <div class="form-group">
+                <label for="downPaymentPercent">Down Payment %:</label>
+                <input type="number" id="downPaymentPercent" placeholder="0%">
+            </div>
+            <div class="form-group">
+                <label for="downPaymentAmount">Down Payment $:</label>
+                <input type="number" id="downPaymentAmount" placeholder="$0.00">
+            </div>
+            <div class="form-group">
+                <label for="originalLoanAmount">Original Base Loan Amount:</label>
+                <input type="number" id="originalLoanAmount" placeholder="$0.00">
+            </div>
+            <div class="form-group">
+                <label for="interestRate">Original Interest Rate:</label>
+                <input type="number" id="interestRate" placeholder="0%">
+            </div>
+            <div class="form-group">
+                <label for="fhaLoan">FHA Loan:</label>
+                <select id="fhaLoan">
+                    <option value="no">NO</option>
+                    <option value="yes">YES</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="mortgageInsuranceFactor">Mortgage Insurance Factor:</label>
+                <input type="number" id="mortgageInsuranceFactor" placeholder="0.00%">
+            </div>
+        </div>
 
-            <button type="button" onclick="calculateAll()">Calculate</button>
-        </form>
+        <!-- Proposed Refinance Section -->
+        <div class="form-section proposed-refinance">
+            <h3>Proposed Refinance</h3>
+            <!-- Form fields for proposed refinance details -->
+            <div class="form-group">
+                <label for="newLoanAmount">New Base Loan Amount:</label>
+                <input type="number" id="newLoanAmount" placeholder="$0.00">
+            </div>
+            <div class="form-group">
+                <label for="newInterestRate">New Interest Rate:</label>
+                <input type="number" id="newInterestRate" placeholder="0%">
+            </div>
+        </div>
     </div>
 
-    <!-- Results Container -->
-    <div class="results-container">
-        <div class="results-section">
-            <h3>Existing Loan Monthly Payment</h3>
-            <p>Principal & Interest Amount: $<span id="existingPI">0.00</span></p>
-            <p>Mortgage Insurance Premium Amount: $<span id="existingMIP">0.00</span></p>
-            <p>Monthly Property Taxes: $<span id="existingTaxes">0.00</span></p>
-            <p>Monthly Homeowner's Insurance: $<span id="existingInsurance">0.00</span></p>
-        </div>
+    <div class="comparison-results">
+        <h3>Loan Comparison Results</h3>
+        <p>Existing Loan Monthly Payment: $0.00</p>
+        <p>Proposed Refinance Monthly Payment: $0.00</p>
+        <p>Monthly Savings: $0.00</p>
+        <p>Break-even Point: 0 months</p>
+        <p>Total Interest Paid: $0.00</p>
 
-        <div class="results-section">
-            <h3>Proposed Refinance Monthly Payment</h3>
-            <p>Principal & Interest Amount: $<span id="proposedPI">0.00</span></p>
-            <p>Mortgage Insurance Premium Amount: $<span id="proposedMIP">0.00</span></p>
-            <p>Monthly Property Taxes: $<span id="proposedTaxes">0.00</span></p>
-            <p>Monthly Homeowner's Insurance: $<span id="proposedInsurance">0.00</span></p>
-        </div>
-
-        <div class="results-section">
-            <h3>Comparison</h3>
-            <p>Monthly Savings: $<span id="monthlySavings">0.00</span></p>
-            <p>Break-even Point (Months): <span id="breakEvenPoint">0</span></p>
-            <p>Total Interest Paid (Existing): $<span id="totalInterestExisting">0.00</span></p>
-            <p>Total Interest Paid (Proposed): $<span id="totalInterestProposed">0.00</span></p>
-            <p>Total Loan Cost at Pay-off (Existing): $<span id="totalLoanCostExisting">0.00</span></p>
-            <p>Total Loan Cost at Pay-off (Proposed): $<span id="totalLoanCostProposed">0.00</span></p>
-        </div>
-
-        <!-- Graph Container -->
-        <div class="results-section">
-            <h3>Cumulative Cost Comparison</h3>
-            <canvas id="costChart"></canvas>
+        <div class="graph-container">
+            <canvas id="comparisonGraph"></canvas>
         </div>
     </div>
-</div>
 
-<!-- Chart.js Library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    // Helper functions
-    function formatCurrency(value) {
-        return parseFloat(value).toLocaleString('en-US', {style: 'currency', currency: 'USD'});
-    }
-
-    function updateDownPayment(type) {
-        const purchasePrice = parseFloat(document.getElementById('purchasePrice').value) || 0;
-        if (type === 'percent') {
-            const percent = parseFloat(document.getElementById('downPaymentPercent').value) || 0;
-            const amount = purchasePrice * (percent / 100);
-            document.getElementById('downPaymentAmount').value = amount.toFixed(2);
-        } else {
-            const amount = parseFloat(document.getElementById('downPaymentAmount').value) || 0;
-            const percent = (amount / purchasePrice) * 100;
-            document.getElementById('downPaymentPercent').value = percent.toFixed(2);
-        }
-        updateOriginalBaseLoan();
-    }
-
-    function updateOriginalBaseLoan() {
-        const purchasePrice = parseFloat(document.getElementById('purchasePrice').value) || 0;
-        const downPaymentAmount = parseFloat(document.getElementById('downPaymentAmount').value) || 0;
-        const originalBaseLoan = purchasePrice - downPaymentAmount;
-        document.getElementById('originalBaseLoan').value = originalBaseLoan.toFixed(2);
-        updateOriginalTotalLoan();
-    }
-
-    function updateMortgageInsuranceFactor(section) {
-        const fhaLoan = document.getElementById(`fhaLoan${section === 'existing' ? 'Existing' : 'Proposed'}`).value;
-        if (fhaLoan === 'Yes') {
-            if (section === 'existing') {
-                const purchaseDate = new Date(document.getElementById('purchaseDate').value);
-                const cutoffDate = new Date('2023-03-01');
-                const factor = purchaseDate < cutoffDate ? 0.85 : 0.55;
-                document.getElementById('mortgageInsuranceFactorExisting').value = factor;
-            } else {
-                document.getElementById('mortgageInsuranceFactorProposed').value = 0.55;
-            }
-        } else {
-            document.getElementById(`mortgageInsuranceFactor${section === 'existing' ? 'Existing' : 'Proposed'}`).value = 0;
-        }
-        updateOriginalTotalLoan();
-    }
-
-    function updateOriginalTotalLoan() {
-        const fhaLoan = document.getElementById('fhaLoanExisting').value;
-        const originalBaseLoan = parseFloat(document.getElementById('originalBaseLoan').value) || 0;
-        let totalLoan = originalBaseLoan;
-        if (fhaLoan === 'Yes') {
-            totalLoan += originalBaseLoan * 0.0175; // Adding 1.75% MIP
-        }
-        document.getElementById('originalTotalLoan').value = totalLoan.toFixed(2);
-        updateEstimatedRemainingBalance();
-    }
-
-    function updateEstimatedRemainingBalance() {
-        const totalLoan = parseFloat(document.getElementById('originalTotalLoan').value) || 0;
-        const interestRate = parseFloat(document.getElementById('originalInterestRate').value) / 100 / 12 || 0;
-        const purchaseDate = new Date(document.getElementById('purchaseDate').value);
-        const currentDate = new Date();
-        const monthsElapsed = (currentDate.getFullYear() - purchaseDate.getFullYear()) * 12 + (currentDate.getMonth() - purchaseDate.getMonth());
-
-        // Assuming a 30-year loan
-        const totalMonths = 360;
-        const monthlyPayment = totalLoan * (interestRate * Math.pow(1 + interestRate, totalMonths)) / (Math.pow(1 + interestRate, totalMonths) - 1);
-
-        let balance = totalLoan;
-        for (let i = 0; i < monthsElapsed; i++) {
-            const interest = balance * interestRate;
-            const principal = monthlyPayment - interest;
-            balance -= principal;
-        }
-        document.getElementById('estimatedRemainingBalance').value = balance.toFixed(2);
-        document.getElementById('newBaseLoanAmount').value = balance.toFixed(2);
-        updateTotalProposedLoanAmount();
-    }
-
-    function updateDiscountPoints(type) {
-        const newBaseLoanAmount = parseFloat(document.getElementById('newBaseLoanAmount').value) || 0;
-        if (type === 'percent') {
-            const percent = parseFloat(document.getElementById('discountPointsPercent').value) || 0;
-            const amount = newBaseLoanAmount * (percent / 100);
-            document.getElementById('discountPointsAmount').value = amount.toFixed(2);
-        } else {
-            const amount = parseFloat(document.getElementById('discountPointsAmount').value) || 0;
-            const percent = (amount / newBaseLoanAmount) * 100;
-            document.getElementById('discountPointsPercent').value = percent.toFixed(2);
-        }
-        updateTotalProposedLoanAmount();
-    }
-
-    function updateTotalClosingCosts() {
-        const escrow = parseFloat(document.getElementById('escrow').value) || 0;
-        const title = parseFloat(document.getElementById('title').value) || 0;
-        const recording = parseFloat(document.getElementById('recording').value) || 0;
-        const totalClosingCosts = escrow + title + recording;
-        document.getElementById('totalClosingCosts').value = totalClosingCosts.toFixed(2);
-    }
-
-    function updateTotalPrepaids() {
-        const currentTaxes = parseFloat(document.getElementById('currentTaxes').value) || 0;
-        const currentInsurance = parseFloat(document.getElementById('currentInsurance').value) || 0;
-        const prepaidTaxes = currentTaxes / 2; // Default to 6 months
-        const prepaidInsurance = currentInsurance; // Default to 12 months
-        document.getElementById('prepaidTaxes').value = prepaidTaxes.toFixed(2);
-        document.getElementById('prepaidInsurance').value = prepaidInsurance.toFixed(2);
-        document.getElementById('totalPrepaids').value = (prepaidTaxes + prepaidInsurance).toFixed(2);
-    }
-
-    function updateTotalLoanCosts() {
-        const processingUnderwriting = parseFloat(document.getElementById('processingUnderwriting').value) || 0;
-        const appraisal = parseFloat(document.getElementById('appraisal').value) || 0;
-        const misc = parseFloat(document.getElementById('misc').value) || 0;
-        const totalLoanCosts = processingUnderwriting + appraisal + misc;
-        document.getElementById('totalLoanCosts').value = totalLoanCosts.toFixed(2);
-    }
-
-    function updateTotalProposedLoanAmount() {
-        const newBaseLoanAmount = parseFloat(document.getElementById('newBaseLoanAmount').value) || 0;
-        const discountPointsAmount = parseFloat(document.getElementById('discountPointsAmount').value) || 0;
-        updateTotalClosingCosts();
-        updateTotalPrepaids();
-        updateTotalLoanCosts();
-        const totalClosingCosts = parseFloat(document.getElementById('totalClosingCosts').value) || 0;
-        const totalPrepaids = parseFloat(document.getElementById('totalPrepaids').value) || 0;
-        const totalLoanCosts = parseFloat(document.getElementById('totalLoanCosts').value) || 0;
-        const fhaLoan = document.getElementById('fhaLoanProposed').value;
-        let totalProposedLoanAmount = newBaseLoanAmount + discountPointsAmount + totalClosingCosts + totalPrepaids + totalLoanCosts;
-        if (fhaLoan === 'Yes') {
-            totalProposedLoanAmount += newBaseLoanAmount * 0.0175; // Adding 1.75% MIP
-        }
-        document.getElementById('totalProposedLoanAmount').value = totalProposedLoanAmount.toFixed(2);
-    }
-
-    function calculateMonthlyPayment(principal, annualInterestRate, totalMonths) {
-        const monthlyInterestRate = annualInterestRate / 12;
-        return principal * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, totalMonths)) / (Math.pow(1 + monthlyInterestRate, totalMonths) - 1);
-    }
-
-    function calculateAll() {
-        // Existing Loan Calculations
-        const existingPrincipal = parseFloat(document.getElementById('estimatedRemainingBalance').value) || 0;
-        const existingInterestRate = parseFloat(document.getElementById('originalInterestRate').value) / 100 || 0;
-        const existingMIF = parseFloat(document.getElementById('mortgageInsuranceFactorExisting').value) / 100 || 0;
-        const existingTaxesAnnual = parseFloat(document.getElementById('currentTaxes').value) || 0;
-        const existingInsuranceAnnual = parseFloat(document.getElementById('currentInsurance').value) || 0;
-
-        const existingPI = calculateMonthlyPayment(existingPrincipal, existingInterestRate, 360);
-        const existingMIP = existingPrincipal * existingMIF / 12;
-        const existingTaxesMonthly = existingTaxesAnnual / 12;
-        const existingInsuranceMonthly = existingInsuranceAnnual / 12;
-
-        document.getElementById('existingPI').innerText = existingPI.toFixed(2);
-        document.getElementById('existingMIP').innerText = existingMIP.toFixed(2);
-        document.getElementById('existingTaxes').innerText = existingTaxesMonthly.toFixed(2);
-        document.getElementById('existingInsurance').innerText = existingInsuranceMonthly.toFixed(2);
-
-        // Proposed Loan Calculations
-        const proposedPrincipal = parseFloat(document.getElementById('totalProposedLoanAmount').value) || 0;
-        const proposedInterestRate = parseFloat(document.getElementById('newInterestRate').value) / 100 || 0;
-        const proposedMIF = parseFloat(document.getElementById('mortgageInsuranceFactorProposed').value) / 100 || 0;
-
-        const proposedPI = calculateMonthlyPayment(proposedPrincipal, proposedInterestRate, 360);
-        const proposedMIP = proposedPrincipal * proposedMIF / 12;
-        const proposedTaxesMonthly = existingTaxesMonthly; // Assuming taxes remain the same
-        const proposedInsuranceMonthly = existingInsuranceMonthly; // Assuming insurance remains the same
-
-        document.getElementById('proposedPI').innerText = proposedPI.toFixed(2);
-        document.getElementById('proposedMIP').innerText = proposedMIP.toFixed(2);
-        document.getElementById('proposedTaxes').innerText = proposedTaxesMonthly.toFixed(2);
-        document.getElementById('proposedInsurance').innerText = proposedInsuranceMonthly.toFixed(2);
-
-        // Comparison Calculations
-        const existingTotalMonthly = existingPI + existingMIP + existingTaxesMonthly + existingInsuranceMonthly;
-        const proposedTotalMonthly = proposedPI + proposedMIP + proposedTaxesMonthly + proposedInsuranceMonthly;
-        const monthlySavings = existingTotalMonthly - proposedTotalMonthly;
-        document.getElementById('monthlySavings').innerText = monthlySavings.toFixed(2);
-
-        const closingCosts = parseFloat(document.getElementById('totalClosingCosts').value) || 0;
-        const breakEvenPoint = closingCosts / monthlySavings;
-        document.getElementById('breakEvenPoint').innerText = breakEvenPoint.toFixed(0);
-
-        // Total Interest Paid Calculations
-        const totalInterestExisting = (existingPI * 360) - existingPrincipal;
-        const totalInterestProposed = (proposedPI * 360) - proposedPrincipal;
-        document.getElementById('totalInterestExisting').innerText = totalInterestExisting.toFixed(2);
-        document.getElementById('totalInterestProposed').innerText = totalInterestProposed.toFixed(2);
-
-        // Total Loan Cost at Pay-off
-        const totalLoanCostExisting = existingPrincipal + totalInterestExisting;
-        const totalLoanCostProposed = proposedPrincipal + totalInterestProposed;
-        document.getElementById('totalLoanCostExisting').innerText = totalLoanCostExisting.toFixed(2);
-        document.getElementById('totalLoanCostProposed').innerText = totalLoanCostProposed.toFixed(2);
-
-        // Generate Graph
-        generateGraph(existingTotalMonthly, proposedTotalMonthly);
-    }
-
-    function generateGraph(existingMonthly, proposedMonthly) {
-        const ctx = document.getElementById('costChart').getContext('2d');
-        const labels = [];
-        const existingCumulative = [];
-        const proposedCumulative = [];
-        let existingTotal = 0;
-        let proposedTotal = 0;
-
-        for (let month = 1; month <= 360; month++) {
-            labels.push(month);
-            existingTotal += existingMonthly;
-            proposedTotal += proposedMonthly;
-            existingCumulative.push(existingTotal);
-            proposedCumulative.push(proposedTotal);
-        }
-
-        if (window.myChart) {
-            window.myChart.destroy();
-        }
-
-        window.myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Existing Loan',
-                        data: existingCumulative,
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        fill: false,
-                    },
-                    {
-                        label: 'Proposed Loan',
-                        data: proposedCumulative,
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        fill: false,
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Months'
-                        }
-                    },
-                    y: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Cumulative Cost ($)'
-                        }
-                    }
-                }
-            }
-        });
-    }
-</script>
+    <script>
+        // Future functionality for calculations and formatting
+    </script>
 
 </body>
 </html>
