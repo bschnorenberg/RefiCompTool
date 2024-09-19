@@ -1,0 +1,44 @@
+/* src/components/RefinanceForm.css */
+
+.form-container {
+  padding: 20px;
+  background-color: #f0f8ff;
+}
+
+.section {
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 5px
+  background-color: #f0f8ff;
+}
+
+.subject-property {
+  background-color: #e6f7ff;
+}
+
+.existing-mortgage {
+  background-color: #fff0f6;
+}
+
+.proposed-refinance {
+  background-color: #f9f0ff;
+}
+
+.button-group {
+  margin-top: 20px;
+}
+
+.button-group button {
+  margin-right: 10px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+label input,
+label select {
+  float: right;
+  width: 50%;
+}

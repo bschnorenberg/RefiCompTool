@@ -1,0 +1,30 @@
+/* src/components/ScenarioList.css */
+
+.scenario-list {
+    margin-top: 20px;
+  }
+  
+  .scenario-list table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .scenario-list th,
+  .scenario-list td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  .scenario-list th {
+    background-color: #f2f2f2;
+    text-align: left;
+  }
+  
+  .scenario-list tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .scenario-list tr:hover {
+    background-color: #ddd;
+  }
+  
