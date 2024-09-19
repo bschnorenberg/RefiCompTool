@@ -2,8 +2,9 @@
 import React from 'react';
 import {
   Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, Typography, Box
+  TableHead, TableRow, Paper, Typography
 } from '@mui/material';
+import { formatCurrency, formatPercentage } from '../utils/formatting'; // Importing formatting helpers
 
 function ComparisonResults({ scenarios }) {
   if (scenarios.length === 0) {
@@ -157,7 +158,7 @@ function ComparisonResults({ scenarios }) {
       monthlySavings: monthlySavings.toFixed(2),
       breakEvenPointMonths: isFinite(breakEvenPointMonths) ? breakEvenPointMonths.toFixed(1) : 'N/A',
       totalInterestPaid: totalInterestPaid.toFixed(2),
-      effectiveInterestRate: effectiveInterestRate.toFixed(2),
+      effectiveInterestRate: effectiveInterestRate.toFixed(3), // 3 decimal places
       npvOfSavings: npvOfSavings.toFixed(2),
       inflationAdjustedSavings: inflationAdjustedSavings.toFixed(2),
       paybackPeriod: isFinite(paybackPeriod) ? paybackPeriod.toFixed(1) : 'N/A',
@@ -194,59 +195,63 @@ function ComparisonResults({ scenarios }) {
           {/* Interest Rate */}
           <TableRow>
             <TableCell>Interest Rate</TableCell>
-            <TableCell>{existingMortgageData.interestRate}%</TableCell> {/* Use existingMortgageData instead of existingMortgage */}
+            <TableCell>{formatPercentage(existingMortgageData.interestRate, 3)}</TableCell> 
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>{result.newInterestRate}%</TableCell>
+              <TableCell key={index}>{formatPercentage(result.newInterestRate, 3)}</TableCell> 
             ))}
           </TableRow>
-          
+
           {/* Monthly Principal and Interest */}
           <TableRow>
             <TableCell>Monthly Principal and Interest</TableCell>
-            <TableCell>${existingMonthlyPayment.toFixed(2)}</TableCell>
+            <TableCell>${formatCurrency(existingMonthlyPayment)}</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>${result.monthlyPayment}</TableCell>
+              <TableCell key={index}>${formatCurrency(result.monthlyPayment)}</TableCell>
             ))}
           </TableRow>
-          
+
           {/* Monthly Mortgage Insurance */}
           <TableRow>
             <TableCell>Monthly Mortgage Insurance (PMI/MIP)</TableCell>
-            <TableCell>${existingPMIPayment.toFixed(2)}</TableCell>
+            <TableCell>${formatCurrency(existingPMIPayment)}</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>${result.pmiPayment}</TableCell>
+              <TableCell key={index}>${formatCurrency(result.pmiPayment)}</TableCell>
             ))}
           </TableRow>
+
           {/* Monthly Taxes and Insurance */}
           <TableRow>
             <TableCell>Monthly Taxes and Insurance</TableCell>
-            <TableCell>${existingMonthlyTaxesInsurance.toFixed(2)}</TableCell>
+            <TableCell>${formatCurrency(existingMonthlyTaxesInsurance)}</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>${result.monthlyTaxesInsurance}</TableCell>
+              <TableCell key={index}>${formatCurrency(result.monthlyTaxesInsurance)}</TableCell>
             ))}
           </TableRow>
+
           {/* Total Monthly PITI Payment */}
           <TableRow>
             <TableCell><strong>Total Monthly PITI Payment</strong></TableCell>
-            <TableCell><strong>${existingTotalMonthlyPayment.toFixed(2)}</strong></TableCell>
+            <TableCell><strong>${formatCurrency(existingTotalMonthlyPayment)}</strong></TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}><strong>${result.totalMonthlyPayment}</strong></TableCell>
+              <TableCell key={index}><strong>${formatCurrency(result.totalMonthlyPayment)}</strong></TableCell>
             ))}
           </TableRow>
+
           {/* Monthly Savings */}
           <TableRow>
             <TableCell>Monthly Savings</TableCell>
             <TableCell>N/A</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>${result.monthlySavings}</TableCell>
+              <TableCell key={index}>${formatCurrency(result.monthlySavings)}</TableCell>
             ))}
           </TableRow>
+
           {/* Break-Even Point */}
           <TableRow>
             <TableCell>Break-Even Point (Months)</TableCell>
             <TableCell>N/A</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>{result.breakEvenPointMonths}</TableCell>
+              <TableCell key={index}>{result.breakEvenPointMonths !== 'N/A' ? parseFloat(result.breakEvenPointMonths).toFixed(1) : 'N/A'}</TableCell>
             ))}
           </TableRow>
 
@@ -256,24 +261,25 @@ function ComparisonResults({ scenarios }) {
               <Typography variant="h6">Secondary Comparison Considerations</Typography>
             </TableCell>
           </TableRow>
+
           {/* Total Interest Paid Over Loan Term */}
           <TableRow>
             <TableCell>Total Interest Paid Over Loan Term</TableCell>
-            <TableCell>${existingTotalInterestPaid.toFixed(2)}</TableCell>
+            <TableCell>${formatCurrency(existingTotalInterestPaid)}</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>${result.totalInterestPaid}</TableCell>
+              <TableCell key={index}>${formatCurrency(result.totalInterestPaid)}</TableCell>
             ))}
           </TableRow>
+
           {/* Total Cost of Home at End of Loan Term */}
-          {/* For simplicity, let's assume it's Loan Amount + Total Interest Paid */}
           <TableRow>
             <TableCell>Total Cost of Home at End of Loan Term</TableCell>
             <TableCell>
               $
               {(
                 parseFloat(existingMortgageData.estimatedRemainingBalance) +
-                existingTotalInterestPaid
-              ).toFixed(2)}
+                parseFloat(existingTotalInterestPaid)
+              ).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </TableCell>
             {scenarioResults.map((result, index) => (
               <TableCell key={index}>
@@ -281,34 +287,38 @@ function ComparisonResults({ scenarios }) {
                 {(
                   parseFloat(result.totalProposedLoanAmount) +
                   parseFloat(result.totalInterestPaid)
-                ).toFixed(2)}
+                ).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </TableCell>
             ))}
           </TableRow>
+
           {/* Effective Interest Rate After Taxes (%) */}
           <TableRow>
             <TableCell>Effective Interest Rate After Taxes (%)</TableCell>
             <TableCell>N/A</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>{result.effectiveInterestRate}%</TableCell>
+              <TableCell key={index}>{formatPercentage(result.effectiveInterestRate, 3)}</TableCell>
             ))}
           </TableRow>
+
           {/* Net Present Value of Savings */}
           <TableRow>
             <TableCell>Net Present Value of Savings</TableCell>
             <TableCell>N/A</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>${result.npvOfSavings}</TableCell>
+              <TableCell key={index}>${formatCurrency(result.npvOfSavings)}</TableCell>
             ))}
           </TableRow>
+
           {/* Inflation-Adjusted Savings */}
           <TableRow>
             <TableCell>Inflation-Adjusted Savings</TableCell>
             <TableCell>N/A</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>${result.inflationAdjustedSavings}</TableCell>
+              <TableCell key={index}>${formatCurrency(result.inflationAdjustedSavings)}</TableCell>
             ))}
           </TableRow>
+
           {/* Payback Period */}
           <TableRow>
             <TableCell>Payback Period (Months, Discounted)</TableCell>
@@ -317,22 +327,25 @@ function ComparisonResults({ scenarios }) {
               <TableCell key={index}>{result.paybackPeriod}</TableCell>
             ))}
           </TableRow>
+
           {/* Equity After Time Horizon */}
           <TableRow>
             <TableCell>Equity After {scenarioResults[0].timeHorizon} Years</TableCell>
             <TableCell>N/A</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>${result.equity}</TableCell>
+              <TableCell key={index}>${formatCurrency(result.equity)}</TableCell>
             ))}
           </TableRow>
+
           {/* Opportunity Cost of Cash-Out Amount */}
           <TableRow>
             <TableCell>Opportunity Cost of Cash-Out Amount</TableCell>
             <TableCell>N/A</TableCell>
             {scenarioResults.map((result, index) => (
-              <TableCell key={index}>${result.opportunityCost}</TableCell>
+              <TableCell key={index}>${formatCurrency(result.opportunityCost)}</TableCell>
             ))}
           </TableRow>
+
           {/* Loan Payoff Date */}
           <TableRow>
             <TableCell>Loan Payoff Date</TableCell>
@@ -441,4 +454,5 @@ function calculateOpportunityCost(cashOutAmount, investmentReturnRate, timeHoriz
   return futureValue - cashOutAmount;
 }
 
+// Export the component
 export default ComparisonResults;

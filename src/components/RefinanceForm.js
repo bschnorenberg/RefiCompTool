@@ -45,7 +45,7 @@ function NumberFormatCustom(props) {
       {...other}
       getInputRef={inputRef}
       thousandSeparator
-      prefix="$"
+      prefix="$ "
       decimalScale={2}
       fixedDecimalScale
       allowNegative={false}
@@ -70,7 +70,7 @@ function PercentFormatCustom(props) {
       {...other}
       getInputRef={inputRef}
       suffix="%"
-      decimalScale={2}
+      decimalScale={3}
       fixedDecimalScale
       allowNegative={false}
       onValueChange={(values) => {
@@ -102,7 +102,7 @@ function RefinanceForm({ addScenario, clearScenarios }) {
   const [downPaymentPercent, setDownPaymentPercent] = useState('5.00');
   const [downPaymentAmount, setDownPaymentAmount] = useState('25000.00');
   const [originalLoanAmount, setOriginalLoanAmount] = useState('400000');
-  const [interestRate, setInterestRate] = useState('7.50');
+  const [interestRate, setInterestRate] = useState('7.500');
   const [isFHALoanExisting, setIsFHALoanExisting] = useState(false);
   const [pmiFactorExisting, setPMIFactorExisting] = useState('0.00');
   const [estimatedRemainingBalance, setEstimatedRemainingBalance] = useState('0');
@@ -141,6 +141,7 @@ function RefinanceForm({ addScenario, clearScenarios }) {
 
   // Loan Summary
   const [totalProposedLoanAmount, setTotalProposedLoanAmount] = useState('0');
+  const totalLoanAmountMinusFHAUFMIP = parseFloat(totalProposedLoanAmount) - parseFloat(ufmipAmount);
   const [ltv, setLTV] = useState('0');
 
   // Additional Assumptions State Variables
@@ -153,7 +154,11 @@ function RefinanceForm({ addScenario, clearScenarios }) {
   const [appreciationRate, setAppreciationRate] = useState('3.00'); // Default to 3%
   */
 
-  // Recalculate dependent fields when relevant inputs change
+  // Remove this line, as you are already using useState for LTV:
+// const ltv = (totalLoanAmountMinusFHAUFMIP / parseFloat(currentValue)) * 100;
+
+
+// Recalculate dependent fields when relevant inputs change
   useEffect(() => {
     // Calculate Down Payment Amount based on Percent
     if (purchasePrice && downPaymentPercent) {
@@ -267,19 +272,18 @@ function RefinanceForm({ addScenario, clearScenarios }) {
       setEscrowCosts(totalEscrows.toFixed(2));
     }
 
-    // Calculate Total Closing Costs (Loan Costs + Prepaids + Escrow Costs + UFMIP if applicable)
+    // Calculate Total Closing Costs (Loan Costs + Prepaids + Escrow Costs)
     let totalClosingCostsCalc =
       parseFloat(loanCosts || 0) +
       parseFloat(prepaids || 0) +
       parseFloat(escrowCosts || 0);
 
-    // Add UFMIP to closing costs if FHA Loan
-    let ufmip = 0;
-    if (isFHALoanProposed) {
+     // Add UFMIP to closing costs if FHA Loan
+     let ufmip = 0;
+     if (isFHALoanProposed) {
       ufmip = parseFloat(baseLoanAmount) * 0.0175; // 1.75%
       setUFMIPAmount(ufmip.toFixed(2));
-      totalClosingCostsCalc += ufmip;
-    } else {
+      } else {
       setUFMIPAmount('0');
     }
 
@@ -347,6 +351,31 @@ function RefinanceForm({ addScenario, clearScenarios }) {
       );
       if (!isNaN(mipFactor)) {
         setPMIFactorProposed(mipFactor.toFixed(2));
+      }
+    }
+    if (baseLoanAmount) {
+      let totalLoan = parseFloat(baseLoanAmount);
+  
+      // Add UFMIP for FHA loans
+      if (isFHALoanProposed) {
+        totalLoan += ufmip;
+      }
+  
+      // Add costs to loan amount if costs are financed
+      if (areCostsFinanced) {
+        totalLoan += totalClosingCostsCalc;
+      }
+  
+      if (!isNaN(totalLoan)) {
+        setTotalProposedLoanAmount(totalLoan.toFixed(2));
+      }
+    }
+  
+    // Calculate Loan-to-Value Ratio (Adjusted)
+    if (totalProposedLoanAmount && currentValue) {
+      const ltvRatio = ((parseFloat(totalProposedLoanAmount) - parseFloat(ufmipAmount)) / parseFloat(currentValue)) * 100;
+      if (!isNaN(ltvRatio)) {
+        setLTV(ltvRatio.toFixed(2)); // Initially set to 2 decimal places
       }
     }
   }, [
